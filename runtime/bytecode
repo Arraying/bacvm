@@ -1,0 +1,13 @@
+1.1
+fi v
+pu name
+pu bool
+pu false
+ff
+si
+fi v
+pu yeet
+pu bool
+pu true
+ff
+sf
