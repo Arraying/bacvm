@@ -98,8 +98,6 @@ c_es | Compares equal or smaller than | Conditional
 c_g | Compares greather than | Conditional
 c_s | Compares smaller than | Conditional
 f | Native function call | Function
-l_a | AND operation | Conditional
-l_o | OR operation | Conditional
 v | Variable declaration | Variable
 
 #### Feed Values
@@ -151,14 +149,14 @@ ff
 
 ##### Variable
 1. The variable identifier.
-2. The type of variable see `variables.md`.
-3. The initial value (can be blank for null).
+3. The initial value (can be blank for 0).
+
+Variable values must be real numbers. No other type is allowed.
 
 As an example, creating the variable `constant` with the value `19`:
 ```
 fi v
 pu constant
-pu number
 pu 19
 ff
 ```
@@ -167,7 +165,6 @@ As an example, creating the copy variable `copy` with the value of `constant`:
 fi v
 pu copy
 vl constant
-pb
 pb
 ff
 ```

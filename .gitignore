@@ -1,0 +1,3 @@
+./runtime/bytecode
+./runtime/run.sh
+./runtime/runtime.exe

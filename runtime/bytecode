@@ -1,13 +1,25 @@
 1.1
 fi v
-pu name
-pu bool
-pu false
+pu itest_1
+pu 123
 ff
-si
 fi v
-pu yeet
-pu bool
-pu true
+pu itest_2
+pu 456
 ff
-sf
+fi c_g
+vl itest_1
+pb
+vl itest_2
+pb
+pu 20
+ff
+fi f
+pu stdoutln
+pu 0
+ff
+ex
+fi f
+pu stdoutln
+pu 1
+ff
