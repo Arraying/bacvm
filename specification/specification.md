@@ -75,15 +75,16 @@ This will initialize a feed operation of type "example", push the values `1` and
 #### Operation List
 \- indicates that there is no argument required.
 ? indicates that the argument is optional
+
 Operation | Description | Argument
 -- | -- | --
-bd | Drops the first buffered value | -
-ex | Exits the VM | -
-ff | Stops a feed operation | -
+bd | Drops the first buffered value | \-
+ex | Exits the VM | \-
+ff | Stops a feed operation | \-
 fi | Starts a feed operation | The feed type
 gc | Garbage cleans a variable | The variable identifier
 gt | Goes to a specific instruction | The instruction (0 based)
-pb | Pushes the first buffered value | -
+pb | Pushes the first buffered value | \-
 pu | Pushes a specified value | The value to push?
 sf | Decrements the current scope | - 
 si | Increments the current scope | -
