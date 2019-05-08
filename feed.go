@@ -1,26 +1,25 @@
 package bacvm
 
-import "fmt"
-
 type (
 	feeder interface {
 		feed(*VM, string) error
 		finalize(*VM) error
 	}
 	feederComparison struct {
-		a     interface{}
-		b     interface{}
+		a     Variable
+		b     Variable
 		index int
 		kind  string
 	}
 	feederFunction struct {
-		arguments []*Variable
-		index     int
-		name      string
+		arguments  []Variable
+		name       string
+		parameters bool
 	}
 	feederVariable struct {
 		index    int
-		variable *Variable
+		name     string
+		variable Variable
 	}
 	feeding struct {
 		current  feeder
@@ -29,71 +28,78 @@ type (
 )
 
 const (
-	feederVarKindMutable  = "m"
-	feederVarKindConstant = "c"
-)
-
-const (
-	feederComparisonTypeA  = "l_a"
 	feederComparisonTypeEg = "c_eg"
 	feederComparisonTypeEq = "c_eq"
 	feederComparisonTypeEs = "c_es"
 	feederComparisonTypeG  = "c_g"
-	feederComparisonTypeO  = "l_o"
 	feederComparisonTypeS  = "c_s"
+	feederFunc             = "f"
 	feederVar              = "v"
 )
 
 func (feeder *feederComparison) feed(vm *VM, argument string) error {
-	// TODO
-	return nil
-}
-
-func (feeder *feederComparison) finalize(vm *VM) error {
-	// TODO
-	return nil
-}
-
-func (feeder *feederFunction) feed(vm *VM, argument string) error {
-	// TODO
-	return nil
-}
-
-func (feeder *feederVariable) feed(vm *VM, argument string) error {
-	var log string
 	switch feeder.index {
 	case 0:
-		feeder.variable = &Variable{
-			Name: argument,
-		}
-		log = "Creating variable " + argument
+		feeder.a = variableCreate(argument)
 	case 1:
-		switch argument {
-		case VariableTypeNumber, VariableTypeBoolean, VariableTypeString:
-			feeder.variable.Type = argument
-		default:
-			return ErrorOperationArgument
-		}
-		log = "Set type " + argument
-	case 2:
-		if err := feeder.variable.Assign(argument); err != nil {
-			return err
-		}
-		log = "Assigned value"
+		feeder.b = variableCreate(argument)
 	default:
 		return ErrorFeedSize
 	}
 	feeder.index++
-	if vm.Verbose {
-		fmt.Println(log)
+	return nil
+}
+
+func (feeder *feederComparison) finalize(vm *VM) error {
+	if feeder.index != 2 {
+		return ErrorFeedQuantity
+	}
+	res := feeder.a.Compare(feeder.kind, feeder.b)
+	reading := &reading{
+		current:  res,
+		previous: vm.reading,
+	}
+	vm.reading = reading
+	return nil
+}
+
+func (feeder *feederFunction) feed(vm *VM, argument string) error {
+	if feeder.parameters {
+		feeder.arguments = append(feeder.arguments, variableCreate(argument))
+	} else {
+		feeder.name = argument
+		feeder.parameters = true
 	}
 	return nil
 }
 
-func (feeder *feederVariable) finalize(vm *VM) error {
-	if feeder.index != 3 {
+func (feeder *feederFunction) finalize(vm *VM) error {
+	fn := vm.natives[feeder.name]
+	if fn == nil {
+		return ErrorFunctionReference
+	}
+	result := fn(vm, feeder.arguments)
+	vm.bufferPush(result.Value())
+	return nil
+}
+
+func (feeder *feederVariable) feed(vm *VM, argument string) error {
+	switch feeder.index {
+	case 0:
+		feeder.name = argument
+	case 1:
+		feeder.variable = variableCreate(argument)
+	default:
 		return ErrorFeedSize
 	}
-	vm.Scope.Put(feeder.variable)
+	feeder.index++
+	return nil
+}
+
+func (feeder *feederVariable) finalize(vm *VM) error {
+	if feeder.index != 2 {
+		return ErrorFeedSize
+	}
+	vm.Scope.Put(feeder.name, feeder.variable)
 	return nil
 }

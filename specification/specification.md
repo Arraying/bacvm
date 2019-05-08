@@ -86,9 +86,11 @@ gc | Garbage cleans a variable | The variable identifier
 gt | Goes to a specific instruction | The instruction (0 based)
 pb | Pushes the first buffered value | \-
 pu | Pushes a specified value | The value to push?
-sf | Decrements the current scope | \- 
-si | Increments the current scope | \-
-vl | Loads a variable type + value onto the buffer | The variable identifier
+sf | Decrements the current scope | - 
+si | Increments the current scope | -
+rn | Inverts the reading | -
+rt | Terminates the reading | -
+vl | Loads a variabl value into the buffer | The variable identifier
 
 #### Feed Reference
 Type | Description | Values
@@ -99,8 +101,6 @@ c_es | Compares equal or smaller than | Conditional
 c_g | Compares greather than | Conditional
 c_s | Compares smaller than | Conditional
 f | Native function call | Function
-l_a | AND operation | Conditional
-l_o | OR operation | Conditional
 v | Variable declaration | Variable
 
 #### Feed Values
@@ -108,14 +108,14 @@ v | Variable declaration | Variable
 ##### Conditional
 1) The left hand side of the comparison.
 2) The right hand side of the comparison.
-3) The instruction to execute a `goto` on if true.
 
-As an example, comparing equality on two numbers:
+This will start a new reader, with whether or not it's reading being determined by the output of the condition.
+
+As an example, comparing equality on two numbers
 ```
 fi c_eq
 pu 2
 pu 2
-pu 55
 ff
 ```
 
@@ -152,14 +152,14 @@ ff
 
 ##### Variable
 1. The variable identifier.
-2. The type of variable see `variables.md`.
-3. The initial value (can be blank for null).
+3. The initial value (can be blank for 0).
+
+Variable values must be real numbers. No other type is allowed.
 
 As an example, creating the variable `constant` with the value `19`:
 ```
 fi v
 pu constant
-pu number
 pu 19
 ff
 ```
@@ -168,7 +168,6 @@ As an example, creating the copy variable `copy` with the value of `constant`:
 fi v
 pu copy
 vl constant
-pb
 pb
 ff
 ```

@@ -5,101 +5,47 @@ import (
 	"strconv"
 )
 
-type (
-	// Variable represents a VM variable.
-	Variable struct {
-		Name  string
-		Type  string
-		Value interface{}
-	}
-)
-
-const (
-	// VariableTypeNumber represents a 64 bit floating point number.
-	VariableTypeNumber = "number"
-	// VariableTypeBoolean represents a true or false value.
-	VariableTypeBoolean = "bool"
-	// VariableTypeString represents a string.
-	VariableTypeString = "string"
-)
-
-// Assign assigns the variable to the string value.
-func (variable *Variable) Assign(value string) (err error) {
-	switch variable.Type {
-	case VariableTypeNumber:
-		if value == "" {
-			variable.Value = 0
-			return
-		}
-		fp, err := strconv.ParseFloat(value, 64)
-		if err != nil {
-			return ErrorVariableType
-		}
-		variable.Value = fp
-	case VariableTypeBoolean:
-		if value == "" {
-			variable.Value = false
-			return
-		}
-		boolean, err := strconv.ParseBool(value)
-		if err != nil {
-			return ErrorVariableType
-		}
-		variable.Value = boolean
-	case VariableTypeString:
-		variable.Value = value
-	}
-	return
-}
+// Variable represents a number. It is stored as a 64 bit floating point number, the maximum value of integers is 53 bit.
+type Variable float64
 
 // Compare compares two variables.
-func (variable *Variable) Compare(comparison string, other *Variable) bool {
-	switch comparison {
-	case feederComparisonTypeA:
-		return variable.Type == VariableTypeBoolean && variable.Value.(bool) && other.Type == VariableTypeBoolean && other.Value.(bool)
+func (variable Variable) Compare(operation string, other Variable) bool {
+	switch operation {
 	case feederComparisonTypeEg:
-		// TODO
+		return variable >= other
 	case feederComparisonTypeEq:
-		if variable.Type == other.Type && variable.Value == other.Value {
-			return true
-		}
-		return false
+		return variable == other
 	case feederComparisonTypeEs:
-		// TODO
+		return variable <= other
 	case feederComparisonTypeG:
-		// TODO
-	case feederComparisonTypeO:
-		if variable.Type == VariableTypeBoolean && variable.Value.(bool) {
-			return true
-		}
-		if other.Type == VariableTypeBoolean && variable.Value.(bool) {
-			return true
-		}
-		return false
+		return variable > other
 	case feederComparisonTypeS:
-		// TODO
-	default:
-		return false
+		return variable < other
 	}
-	// TODO
 	return false
 }
 
-// ValueString gets the value as a string.
-func (variable *Variable) ValueString() string {
-	return fmt.Sprintf("%v", variable.Value)
+// Value returns the value of the variable as a string.
+func (variable Variable) Value() string {
+	return fmt.Sprintf("%f", variable)
 }
 
-// Weight gets the weight of the variable type.
-func (variable *Variable) Weight() int {
-	switch variable.Type {
-	case VariableTypeNumber:
-		return 2
-	case VariableTypeBoolean:
-		return 3
-	case VariableTypeString:
-		return 1
-	default:
-		return 0
+// VariableBounded determines whether the integer can be represented within 53 bits, the highest integer value.
+func VariableBounded(input int) bool {
+	if input < 0 {
+		input *= -1
 	}
+	count := 0
+	for input != 0 {
+		count++
+		input >>= 1
+	}
+	return count <= 53
+}
+
+// variableCreate creates a variable from a piece of string.
+// If the string cannot be parsed into a 64 bit floating point integer then it will fall back to 0.
+func variableCreate(data string) Variable {
+	val, _ := strconv.ParseFloat(data, 64)
+	return Variable(val)
 }

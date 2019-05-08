@@ -4,9 +4,10 @@ import (
 	"bufio"
 	"errors"
 	"flag"
-	"fmt"
 	"os"
 	"strings"
+
+	"github.com/arraying/bacvm/native"
 
 	"github.com/arraying/bacvm"
 )
@@ -22,6 +23,7 @@ func init() {
 	files = flag.Args()
 }
 
+// main will run all the specified files in the appropriate order.
 func main() {
 	for _, arg := range files {
 		if err := run(arg); err != nil {
@@ -34,7 +36,13 @@ func run(arg string) error {
 	vm := bacvm.VM{
 		Verbose: verbose,
 	}
-	vm.Natives()
+	vm.Natives(&bacvm.Native{
+		Name: "stdout",
+		Task: native.StdOut,
+	}, &bacvm.Native{
+		Name: "stdoutln",
+		Task: native.StdOutLn,
+	})
 	file, err := os.Open(arg)
 	if err != nil {
 		return err
@@ -62,9 +70,5 @@ func run(arg string) error {
 	err = vm.Run(func() []*bacvm.Instruction {
 		return instructions
 	})
-	if err != nil {
-		return err
-	}
-	fmt.Println(vm.Scope.Get("name"))
-	return nil
+	return err
 }
