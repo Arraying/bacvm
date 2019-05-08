@@ -87,7 +87,9 @@ pb | Pushes the first buffered value | -
 pu | Pushes a specified value | The value to push?
 sf | Decrements the current scope | - 
 si | Increments the current scope | -
-vl | Loads a variable type + value onto the buffer | The variable identifier
+rn | Inverts the reading | -
+rt | Terminates the reading | -
+vl | Loads a variabl value into the buffer | The variable identifier
 
 #### Feed Reference
 Type | Description | Values
@@ -105,14 +107,14 @@ v | Variable declaration | Variable
 ##### Conditional
 1) The left hand side of the comparison.
 2) The right hand side of the comparison.
-3) The instruction to execute a `goto` on if true.
 
-As an example, comparing equality on two numbers:
+This will start a new reader, with whether or not it's reading being determined by the output of the condition.
+
+As an example, comparing equality on two numbers
 ```
 fi c_eq
 pu 2
 pu 2
-pu 55
 ff
 ```
 

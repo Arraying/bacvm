@@ -34,12 +34,17 @@ type (
 		index        int
 		instructions []*Instruction
 		natives      map[string]Function
+		reading      *reading
 	}
 	buffer struct {
 		value    string
 		previous *buffer
 	}
 	operation func(*VM, string)
+	reading   struct {
+		current  bool
+		previous *reading
+	}
 )
 
 var operations = map[string]operation{
@@ -51,6 +56,8 @@ var operations = map[string]operation{
 	"gt": gt,
 	"pb": pb,
 	"pu": pu,
+	"rn": rn,
+	"rt": rt,
 	"sf": sf,
 	"si": si,
 	"vl": vl,
@@ -76,6 +83,9 @@ func (vm *VM) Run(get func() []*Instruction) error {
 	}
 	vm.instructions = get()
 	vm.Scope = &Scope{}
+	vm.reading = &reading{
+		current: true,
+	}
 	for vm.index < len(vm.instructions) && !vm.exit {
 		ins := vm.instructions[vm.index]
 		if vm.Verbose {
@@ -84,6 +94,12 @@ func (vm *VM) Run(get func() []*Instruction) error {
 		op, contains := operations[ins.Operation]
 		if !contains {
 			return ErrorOperationUnknown
+		}
+		if vm.reading != nil && !vm.reading.current {
+			if ins.Operation != "rn" && ins.Operation != "rt" {
+				vm.index++
+				continue
+			}
 		}
 		op(vm, ins.Argument)
 		if vm.err != nil {
@@ -265,6 +281,44 @@ func pu(vm *VM, argument string) {
 	vm.err = vm.feeding.current.feed(vm, argument)
 }
 
+// // TODO -- run currently errors, if the current section is not meant to be flipped, it will still get flipped
+// // possible solution: current reading and all previous readings need to be true
+
+// // rn inverts the current reading, if applicable
+// func rn(vm *VM, argument string) {
+// 	if vm.reading == nil {
+// 		vm.err = ErrorReadingClose
+// 		return
+// 	}
+// 	previously := vm.reading.truthy()
+// 	if !previously {
+// 		return
+// 	}
+// 	vm.reading.current = !(vm.reading.previouslyTrue() && vm.reading.current)
+// }
+
+// rn inverts the current reading.
+func rn(vm *VM, argument string) {
+	if vm.reading == nil {
+		vm.err = ErrorReadingClose
+		return
+	}
+	if !vm.reading.previously() {
+		return
+	}
+	vm.reading.current = !vm.reading.current
+}
+
+// rt stops the current reading, if applicable
+func rt(vm *VM, argument string) {
+	if vm.reading == nil {
+		vm.err = ErrorReadingClose
+		return
+	}
+	current := vm.reading
+	vm.reading = current.previous
+}
+
 // sf destroys the current scope, alongside all scope-specific variables in it.
 // If a variable with the same name was declared in previous scopes then this variable will obtain the value of the variable in the current scope.
 func sf(vm *VM, argument string) {
@@ -293,4 +347,19 @@ func si(vm *VM, argument string) {
 func vl(vm *VM, argument string) {
 	variable := vm.Scope.Get(argument)
 	vm.bufferVariable(variable)
+}
+
+// truthy checks if ALL the previous values are true.
+func (reading *reading) truthy() bool {
+	if reading.previous == nil {
+		return true
+	}
+	return reading.previous.current && reading.previous.truthy()
+}
+
+func (reading *reading) previously() bool {
+	if reading.previous == nil {
+		return true
+	}
+	return reading.previous.current
 }

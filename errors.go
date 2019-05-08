@@ -19,6 +19,8 @@ var (
 	ErrorOperationArgument = errors.New("unexpected operation argument")
 	// ErrorOperationUnknown is an error.
 	ErrorOperationUnknown = errors.New("unknown operation")
+	// ErrorReadingClose is an error.
+	ErrorReadingClose = errors.New("there is no active reading session")
 	// ErrorVariableExistance is an error.
 	ErrorVariableExistance = errors.New("variable referenced does not exist")
 	// ErrorVariableType is an error.

@@ -1,7 +1,5 @@
 package bacvm
 
-import "fmt"
-
 type (
 	feeder interface {
 		feed(*VM, string) error
@@ -10,7 +8,6 @@ type (
 	feederComparison struct {
 		a     Variable
 		b     Variable
-		jump  string
 		index int
 		kind  string
 	}
@@ -46,27 +43,23 @@ func (feeder *feederComparison) feed(vm *VM, argument string) error {
 		feeder.a = variableCreate(argument)
 	case 1:
 		feeder.b = variableCreate(argument)
-	case 2:
-		feeder.jump = argument
 	default:
 		return ErrorFeedSize
 	}
-	fmt.Println("current", feeder.index)
 	feeder.index++
 	return nil
 }
 
 func (feeder *feederComparison) finalize(vm *VM) error {
-	fmt.Println("whaaaaT")
-	if feeder.index != 3 {
+	if feeder.index != 2 {
 		return ErrorFeedQuantity
 	}
-	if feeder.a.Compare(feeder.kind, feeder.b) {
-		fmt.Println("truE!!!")
-		gt(vm, feeder.jump)
-	} else {
-		fmt.Println("falsE!!!")
+	res := feeder.a.Compare(feeder.kind, feeder.b)
+	reading := &reading{
+		current:  res,
+		previous: vm.reading,
 	}
+	vm.reading = reading
 	return nil
 }
 
