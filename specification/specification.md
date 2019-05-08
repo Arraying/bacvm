@@ -90,7 +90,7 @@ sf | Decrements the current scope | -
 si | Increments the current scope | -
 rn | Inverts the reading | -
 rt | Terminates the reading | -
-vl | Loads a variabl value into the buffer | The variable identifier
+vl | Loads a variable value into the buffer | The variable identifier
 
 #### Feed Reference
 Type | Description | Values
