@@ -1,6 +1,7 @@
 package bacvm
 
 import (
+	"bytes"
 	"fmt"
 	"strconv"
 )
@@ -110,6 +111,34 @@ func (vm *VM) Run(get func() []*Instruction) error {
 	return nil
 }
 
+// Dump dumps the current virtual machine state.
+func (vm *VM) Dump() string {
+	var buffer bytes.Buffer
+	buffer.WriteString(fmt.Sprintf("BacVM %s Dump\n", Version()))
+	buffer.WriteString("Scopes =>\n")
+	buffer.WriteString(vm.Scope.Pretty(1))
+	buffer.WriteString("Buffer =>\n")
+	currentBuffer := vm.buffer
+	for currentBuffer != nil {
+		buffer.WriteString(fmt.Sprintf("  %s", currentBuffer.value))
+		currentBuffer = currentBuffer.previous
+	}
+	buffer.WriteString("Feeding =>\n")
+	currentFeeder := vm.feeding
+	for currentFeeder != nil {
+		buffer.WriteString(fmt.Sprintf("  %T", currentFeeder.current))
+		currentFeeder = currentFeeder.previous
+	}
+	buffer.WriteString("Reading =>\n")
+	currentReading := vm.reading
+	for currentReading != nil {
+		buffer.WriteString(fmt.Sprintf("  %t", currentReading.current))
+		currentReading = currentReading.previous
+	}
+	buffer.WriteString("\n\n")
+	return buffer.String()
+}
+
 // bufferPush pushes a new value onto the buffer, the previous value will be stored.
 func (vm *VM) bufferPush(data string) {
 	newBuffer := &buffer{
@@ -164,6 +193,22 @@ func (scope *Scope) Get(identifier string) Variable {
 func (scope *Scope) Put(identifier string, variable Variable) {
 	scope.initialize()
 	scope.variables[identifier] = variable
+}
+
+// Pretty pretty prints the current scope, using indents
+func (scope *Scope) Pretty(level int) string {
+	padding := ""
+	for i := 0; i < level; i++ {
+		padding += "  "
+	}
+	var buffer bytes.Buffer
+	for k, v := range scope.variables {
+		buffer.WriteString(fmt.Sprintf("%s%s %v\n", padding, k, v))
+	}
+	if scope.previous != nil {
+		buffer.WriteString(scope.previous.Pretty(level + 1))
+	}
+	return buffer.String()
 }
 
 // initialize initializes the scope.
@@ -281,22 +326,6 @@ func pu(vm *VM, argument string) {
 	vm.err = vm.feeding.current.feed(vm, argument)
 }
 
-// // TODO -- run currently errors, if the current section is not meant to be flipped, it will still get flipped
-// // possible solution: current reading and all previous readings need to be true
-
-// // rn inverts the current reading, if applicable
-// func rn(vm *VM, argument string) {
-// 	if vm.reading == nil {
-// 		vm.err = ErrorReadingClose
-// 		return
-// 	}
-// 	previously := vm.reading.truthy()
-// 	if !previously {
-// 		return
-// 	}
-// 	vm.reading.current = !(vm.reading.previouslyTrue() && vm.reading.current)
-// }
-
 // rn inverts the current reading.
 func rn(vm *VM, argument string) {
 	if vm.reading == nil {
@@ -349,14 +378,7 @@ func vl(vm *VM, argument string) {
 	vm.bufferVariable(variable)
 }
 
-// truthy checks if ALL the previous values are true.
-func (reading *reading) truthy() bool {
-	if reading.previous == nil {
-		return true
-	}
-	return reading.previous.current && reading.previous.truthy()
-}
-
+// previously checks if the previous reading is true
 func (reading *reading) previously() bool {
 	if reading.previous == nil {
 		return true

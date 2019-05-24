@@ -1,3 +1,3 @@
 rm runtime.exe
 go build runtime.go
-./runtime.exe --verbose bytecode
+./runtime.exe --verbose test.bvm

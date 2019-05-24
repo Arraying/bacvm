@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"flag"
+	"fmt"
 	"os"
 	"strings"
 
@@ -62,7 +63,11 @@ func run(arg string) error {
 				Operation: parts[0],
 			}
 			if len(parts) > 1 {
-				instruction.Argument = parts[1]
+				argument := parts[1]
+				if comment := strings.Index(argument, ";"); comment != -1 {
+					argument = argument[:comment-1]
+				}
+				instruction.Argument = argument
 			}
 			instructions = append(instructions, instruction)
 		}
@@ -70,5 +75,8 @@ func run(arg string) error {
 	err = vm.Run(func() []*bacvm.Instruction {
 		return instructions
 	})
+	if err != nil {
+		fmt.Println(vm.Dump())
+	}
 	return err
 }

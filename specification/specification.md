@@ -31,6 +31,13 @@ The first line is a special line, because it is not like any other line. The fir
 #### The Instructions
 Each line represents one instruction. An instruction contains the operation and can contain zero or one argument(s), no more. The operation will always be one word, two letters, and is case sensitive! BVM specifies the operations to be all lowercase. In the case that there are arguments, these are separated from the instructions via a space.
 
+#### Comments
+To add a comment, simply add ; at the end of an instruction. Any text after the semi colon will be interpreted as a comment. As an example:
+```
+1.0.0
+ex ; exits the virtual machine
+```
+
 #### Example
 ```
 1.0.0
