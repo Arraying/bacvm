@@ -34,13 +34,13 @@ Each line represents one instruction. An instruction contains the operation and 
 #### Comments
 To add a comment, simply add ; at the end of an instruction. Any text after the semi colon will be interpreted as a comment. As an example:
 ```
-1.0.0
+1.0
 ex ; exits the virtual machine
 ```
 
 #### Example
 ```
-1.0.0
+1.0
 ex
 ```
 In this example, the version, `1.0.0`, is defined in the first line. Then, the first and only instruction, `ex` (exit), is defined, which takes no parameters.
