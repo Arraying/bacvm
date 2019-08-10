@@ -43,7 +43,7 @@ ex ; exits the virtual machine
 1.0
 ex
 ```
-In this example, the version, `1.0.0`, is defined in the first line. Then, the first and only instruction, `ex` (exit), is defined, which takes no parameters.
+In this example, the version, `1.0`, is defined in the first line. Then, the first and only instruction, `ex` (exit), is defined, which takes no parameters.
 
 ## Operations
 Operations are tasks that BVM will execute. An operation can have an argument. There are two types of operations, feed and non-feed operations. Generally, feed operations require multiple instructions, non-feed operations only require one. These will be explored more in depth below.
@@ -57,9 +57,9 @@ These are as simple as operations can get. They are only one instruction.
 Examples (with and without argument):
 ```
 ex
-gt 0
+gt 1
 ```
-In the examples, `ex` takes no argument, `gt` takes the argument `11`.
+In the examples, `ex` takes no argument, `gt` takes the argument `1`.
 
 #### Feed Operations
 Sometimes, only one argument will not suffice. For example, if you want to declare a variable, you need to provide at the very least the name and the value, which is not possible with only 1 argument (technically you could split the argument, but this gets very messy). It is because of this that feed operations exist. The feed instructions are as follows:
@@ -129,7 +129,7 @@ ff
 ##### Function
 1. The function name.
 
-A function call can specify more values. These are treated as parameters. Per parameter, there are two values that need to be pushed: the variable type and variable value. As you may notice, exactly these two values are pushed onto the buffer when you load a variable using `vl`.
+A function call can specify more values. These are treated as parameters.
 
 As an example, executing the function `foo` with no parameters:
 ```
@@ -138,12 +138,11 @@ pu foo
 ff
 ```
 
-As an example, executing the function `stdout` with the variable "Hello, world":
+As an example, executing the function `stdout` with the variable `0`:
 ```
 fi f
 pu stdout
-pu string
-pu Hello, world
+pu 0
 ff
 ```
 
@@ -152,7 +151,6 @@ As an example, executing the function `stdout` referencing the variable `test` a
 fi f
 pu stdout
 vl test
-pb
 pb
 ff
 ```
